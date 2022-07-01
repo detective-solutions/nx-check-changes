@@ -172,10 +172,10 @@ const main = async () => {
   console.log('changed implicit dependencies:');
   console.log(changes.implicitDependencies);
 
-  setOutput('changed-apps', changes.apps.join(' '));
-  setOutput('changed-libs', changes.libs.join(' '));
-  setOutput('changed-dirs', [...changes.apps, ...changes.libs].join(' '));
-  setOutput('changed-implicit-dependencies', changes.implicitDependencies.join(' '));
+  setOutput('changed-apps', changes.apps);
+  setOutput('changed-libs', changes.libs);
+  setOutput('changed-dirs', [...changes.apps, ...changes.libs]);
+  setOutput('changed-implicit-dependencies', changes.implicitDependencies);
   setOutput(
     'not-affected',
     changes.apps.length === 0 &&
