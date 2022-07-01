@@ -172,9 +172,7 @@ const main = async () => {
   console.log('changed implicit dependencies:');
   console.log(changes.implicitDependencies);
 
-  console.log(JSON.stringify({ app: changes.apps }));
-
-  setOutput('changed-apps', JSON.stringify({ app: changes.apps }));
+  setOutput('changed-apps', JSON.stringify(changes.apps));
   setOutput('changed-libs', changes.libs);
   setOutput('changed-dirs', [...changes.apps, ...changes.libs]);
   setOutput('changed-implicit-dependencies', changes.implicitDependencies);
