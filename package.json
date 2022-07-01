@@ -1,7 +1,7 @@
 {
   "name": "nx-check-changes",
   "description": "GitHub Action that checks path changes in a Nx workspace",
-  "version": "1.0.0",
+  "version": "1.0.0-alpha",
   "private": true,
   "main": "dist/index.js",
   "scripts": {

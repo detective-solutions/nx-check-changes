@@ -1,5 +1,5 @@
-import { getInput, info, setFailed, setOutput } from '@actions/core';
 import * as core from '@actions/core';
+import { getInput, info, setFailed, setOutput } from '@actions/core';
 import { context } from '@actions/github';
 import { NxJson } from '@nrwl/workspace';
 import { promises as fs } from 'fs';
@@ -172,7 +172,9 @@ const main = async () => {
   console.log('changed implicit dependencies:');
   console.log(changes.implicitDependencies);
 
-  setOutput('changed-apps', changes.apps);
+  console.log(JSON.stringify({ app: changes.apps }));
+
+  setOutput('changed-apps', JSON.stringify({ app: changes.apps }));
   setOutput('changed-libs', changes.libs);
   setOutput('changed-dirs', [...changes.apps, ...changes.libs]);
   setOutput('changed-implicit-dependencies', changes.implicitDependencies);
