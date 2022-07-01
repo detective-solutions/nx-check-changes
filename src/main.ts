@@ -163,19 +163,20 @@ const main = async () => {
 
   console.log('');
 
-  console.log('changed apps:');
+  console.log('Changed apps:');
   console.log(changes.apps);
 
-  console.log('changed libs:');
+  console.log('Changed libs:');
   console.log(changes.libs);
 
-  console.log('changed implicit dependencies:');
+  console.log('Changed implicit dependencies:');
   console.log(changes.implicitDependencies);
 
+  // Output stringified lists in order to be reused as dynamic matrix inputs for follow-up actions
   setOutput('changed-apps', JSON.stringify(changes.apps));
-  setOutput('changed-libs', changes.libs);
-  setOutput('changed-dirs', [...changes.apps, ...changes.libs]);
-  setOutput('changed-implicit-dependencies', changes.implicitDependencies);
+  setOutput('changed-libs', JSON.stringify(changes.libs));
+  setOutput('changed-dirs', JSON.stringify([...changes.apps, ...changes.libs]));
+  setOutput('changed-implicit-dependencies', JSON.stringify(changes.implicitDependencies));
   setOutput(
     'not-affected',
     changes.apps.length === 0 &&

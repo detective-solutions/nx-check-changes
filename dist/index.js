@@ -141,16 +141,16 @@ const main = async () => {
         changedFiles
     });
     console.log('');
-    console.log('changed apps:');
+    console.log('Changed apps:');
     console.log(changes.apps);
-    console.log('changed libs:');
+    console.log('Changed libs:');
     console.log(changes.libs);
-    console.log('changed implicit dependencies:');
+    console.log('Changed implicit dependencies:');
     console.log(changes.implicitDependencies);
     core_1.setOutput('changed-apps', JSON.stringify(changes.apps));
-    core_1.setOutput('changed-libs', changes.libs);
-    core_1.setOutput('changed-dirs', [...changes.apps, ...changes.libs]);
-    core_1.setOutput('changed-implicit-dependencies', changes.implicitDependencies);
+    core_1.setOutput('changed-libs', JSON.stringify(changes.libs));
+    core_1.setOutput('changed-dirs', JSON.stringify([...changes.apps, ...changes.libs]));
+    core_1.setOutput('changed-implicit-dependencies', JSON.stringify(changes.implicitDependencies));
     core_1.setOutput('not-affected', changes.apps.length === 0 &&
         changes.libs.length === 0 &&
         changes.implicitDependencies.length === 0);
