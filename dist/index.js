@@ -32,11 +32,11 @@ exports.exec = exec;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __webpack_require__(2186);
 const core = __webpack_require__(2186);
+const core_1 = __webpack_require__(2186);
 const github_1 = __webpack_require__(5438);
-const fs_1 = __webpack_require__(5747);
 const exec_1 = __webpack_require__(7757);
+const fs_1 = __webpack_require__(5747);
 const getBaseAndHeadRefs = ({ base, head }) => {
     var _a, _b, _c, _d;
     if (!base && !head) {
@@ -147,7 +147,8 @@ const main = async () => {
     console.log(changes.libs);
     console.log('changed implicit dependencies:');
     console.log(changes.implicitDependencies);
-    core_1.setOutput('changed-apps', changes.apps);
+    console.log(JSON.stringify({ app: changes.apps }));
+    core_1.setOutput('changed-apps', JSON.stringify({ app: changes.apps }));
     core_1.setOutput('changed-libs', changes.libs);
     core_1.setOutput('changed-dirs', [...changes.apps, ...changes.libs]);
     core_1.setOutput('changed-implicit-dependencies', changes.implicitDependencies);
