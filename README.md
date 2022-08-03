@@ -1,12 +1,13 @@
 # nx-check-changes
 
-GitHub Action that checks if a code change affects any app, lib or implicit dependency in a Nx workspace.
+GitHub Action that checks if a code change affects any app or lib in a Nx workspace.
 
 Checking-out the repository is mandatory before executing the action because it needs to read the `nx.json` file.
 
-There are times when you want to know which apps, libs or implicit dependencies configured inside `nx.json` have changed from commit to commit before executing `nx affected:*` commands. If there's nothing to build, test and deploy, then you actually don't need to execute all the steps before running the nx command. This is some valious time that you can save.
+There are times when you want to know which apps or libs configured inside `nx.json` have changed from commit to commit before executing `nx affected:*` commands. If there's nothing to build, test and deploy, then you actually don't need to execute all the steps before running the nx command. This is some valious time that you can save.
 
 Some practical use cases are:
+
 - Integration with SonarQube or SonarCloud. If you want to analyse apps or libs isolated from the others you have to create a `sonar-project.properties` file for each of them. Then you need to go to all the apps/libs that have changed and run the scanner.
 - Linting projects. With Nx you have the command `nx affected:lint` but this script is not useful the way it behaves because it will also lint affected projects and this is something not desired, you only want to lint the project that has been modified, or even better only lint the files that changed but that's another improvement out of the scope of this GitHub action.
 
@@ -47,10 +48,6 @@ This action automatically takes the base and head refs from the `pull_request` a
 - **changed-libs**: _string_
 
   Space-delimited list of lib root paths that have been modified. If no libs have been modified, an empty string is returned. Example: `libs/lib1 libs/lib2`.
-
-- **changed-implicit-dependencies**: _string_
-
-  Space-delimited list of implicit dependency files that have been modified. If none of the given directories have been modified, an empty string is returned. The implicit dependencies are read from the `nx.json` file. Example: `package.json`.
 
 - **not-affected**: _string_
 
