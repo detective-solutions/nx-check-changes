@@ -37,6 +37,7 @@ const core_1 = __webpack_require__(2186);
 const github_1 = __webpack_require__(5438);
 const exec_1 = __webpack_require__(7757);
 const fs_1 = __webpack_require__(5747);
+const fs_2 = __webpack_require__(5747);
 const getBaseAndHeadRefs = ({ base, head }) => {
     var _a, _b, _c, _d;
     if (!base && !head) {
@@ -92,10 +93,29 @@ const dirFinder = (dir) => {
     const pathRegExp = new RegExp(`^${dir}/([^/]+)`);
     return (file) => { var _a; return (_a = file.match(pathRegExp)) === null || _a === void 0 ? void 0 : _a[1]; };
 };
+const getCiDependenciesPerApp = () => {
+    const ciDependenciesPerApp = {};
+    const files = fs_2.readdirSync('/').filter((fileName) => fileName === 'project.json');
+    console.log('');
+    console.log(files);
+    if (!files || files.length === 0) {
+        return ciDependenciesPerApp;
+    }
+    files.forEach((file) => {
+        const json = JSON.parse(file);
+        const appName = json.root.split('apps/')[1];
+        const ciDependencyFolders = json.ciDependencyFolders;
+        ciDependenciesPerApp[appName] = ciDependencyFolders;
+    });
+    return ciDependenciesPerApp;
+};
 const getChanges = ({ appsDir, libsDir, implicitDependencies, changedFiles }) => {
     const findApp = dirFinder(appsDir);
     const findLib = dirFinder(libsDir);
     const findImplicitDependencies = (file) => implicitDependencies.find(dependency => file === dependency);
+    const ciDependenciesPerApp = getCiDependenciesPerApp();
+    console.log('');
+    console.log('-TEST-', ciDependenciesPerApp);
     const changes = changedFiles.reduce((accumulatedChanges, file) => {
         const app = findApp(file);
         if (app) {

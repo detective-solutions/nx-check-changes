@@ -1,11 +1,10 @@
 import * as core from '@actions/core';
-
 import { getInput, info, setFailed, setOutput } from '@actions/core';
-
-import { NxJson } from '@nrwl/workspace';
 import { context } from '@actions/github';
+import { NxJson } from '@nrwl/workspace';
+import { promises as fs, readdirSync } from 'fs';
+
 import { exec } from './exec';
-import { promises as fs } from 'fs';
 
 interface Changes {
   apps: string[];
@@ -91,8 +90,10 @@ const dirFinder = (dir: string): ((file: string) => string | undefined) => {
 };
 
 const getCiDependenciesPerApp = () => {
-  const ciDependenciesPerApp: any = {}
-  const files = fs.readdirSync('/').filter((fileName: string) => fileName === 'project.json');
+  const ciDependenciesPerApp: any = {};
+  const files = readdirSync('/').filter((fileName: string) => fileName === 'project.json');
+  console.log('');
+  console.log(files);
   if (!files || files.length === 0) {
     return ciDependenciesPerApp;
   }
@@ -100,10 +101,10 @@ const getCiDependenciesPerApp = () => {
     const json = JSON.parse(file);
     const appName = json.root.split('apps/')[1];
     const ciDependencyFolders = json.ciDependencyFolders;
-    ciDependenciesPerApp[appName] = ciDependencyFolders
-  })
+    ciDependenciesPerApp[appName] = ciDependencyFolders;
+  });
   return ciDependenciesPerApp;
-}
+};
 
 const getChanges = ({
   appsDir,
@@ -120,9 +121,9 @@ const getChanges = ({
   const findLib = dirFinder(libsDir);
   const findImplicitDependencies = (file: string) =>
     implicitDependencies.find(dependency => file === dependency);
-
   const ciDependenciesPerApp = getCiDependenciesPerApp();
-  console.log('-TEST-', ciDependenciesPerApp)
+  console.log('');
+  console.log('-TEST-', ciDependenciesPerApp);
 
   const changes = changedFiles.reduce<{
     apps: Set<string>;
