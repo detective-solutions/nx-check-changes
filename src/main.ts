@@ -92,7 +92,6 @@ const dirFinder = (dir: string): ((file: string) => string | undefined) => {
 
 const getCiDependenciesPerApp = async (appsDir: string) => {
   const ciDependenciesPerApp: { [key: string]: string[] } = {};
-
   const projectFilePaths = getAllFiles(appsDir).filter((fileName: string) =>
     fileName.endsWith('project.json')
   );
@@ -104,11 +103,11 @@ const getCiDependenciesPerApp = async (appsDir: string) => {
     const projectFile = JSON.parse(await fs.readFile(projectFilePath, { encoding: 'utf-8' }));
     const appName = projectFile.root.split('apps/')[1];
     const ciDependencyFolders = projectFile.ciDependencyFolders;
-    ciDependenciesPerApp[appName] = ciDependencyFolders;
+    if (appName && ciDependencyFolders) {
+      ciDependenciesPerApp[appName] = ciDependencyFolders;
+    }
   }
 
-  console.log('');
-  console.log(ciDependenciesPerApp);
   return ciDependenciesPerApp;
 };
 
@@ -116,20 +115,19 @@ const getChanges = async ({
   appsDir,
   libsDir,
   implicitDependencies,
+  ciDependenciesPerApp,
   changedFiles
 }: {
   appsDir: string;
   libsDir: string;
   implicitDependencies: string[];
+  ciDependenciesPerApp: { [key: string]: string[] };
   changedFiles: string[];
 }): Promise<Changes> => {
   const findApp = dirFinder(appsDir);
   const findLib = dirFinder(libsDir);
   const findImplicitDependencies = (file: string) =>
     implicitDependencies.find(dependency => file === dependency);
-  const ciDependenciesPerApp = await getCiDependenciesPerApp(appsDir);
-  console.log('');
-  console.log('-TEST-', ciDependenciesPerApp);
 
   const changes = changedFiles.reduce<{
     apps: Set<string>;
@@ -144,7 +142,14 @@ const getChanges = async ({
       const lib = findLib(file);
       if (lib) {
         accumulatedChanges.libs.add(lib);
+
+        for (const [key, value] of Object.entries(ciDependenciesPerApp)) {
+          if (value.includes(lib)) {
+            accumulatedChanges.apps.add(key);
+          }
+        }
       }
+
       const implicitDependency = findImplicitDependencies(file);
       if (implicitDependency) {
         accumulatedChanges.implicitDependencies.push(implicitDependency);
@@ -180,10 +185,14 @@ const main = async () => {
   const appsDir = nxFile.workspaceLayout?.appsDir || 'apps';
   const libsDir = nxFile.workspaceLayout?.libsDir || 'libs';
 
+  const ciDependenciesPerApp = await getCiDependenciesPerApp(appsDir);
+  console.log(ciDependenciesPerApp);
+
   const changes = await getChanges({
     appsDir,
     libsDir,
     implicitDependencies,
+    ciDependenciesPerApp,
     changedFiles
   });
 
