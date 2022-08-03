@@ -93,7 +93,7 @@ const dirFinder = (dir) => {
     const pathRegExp = new RegExp(`^${dir}/([^/]+)`);
     return (file) => { var _a; return (_a = file.match(pathRegExp)) === null || _a === void 0 ? void 0 : _a[1]; };
 };
-const getCiDependenciesPerApp = (appsDir) => {
+const getCiDependenciesPerApp = async (appsDir) => {
     const ciDependenciesPerApp = {};
     const projectFilePaths = utils_1.getAllFiles(appsDir).filter((fileName) => fileName.endsWith('project.json'));
     if (!projectFilePaths || projectFilePaths.length === 0) {
@@ -110,11 +110,11 @@ const getCiDependenciesPerApp = (appsDir) => {
     });
     return ciDependenciesPerApp;
 };
-const getChanges = ({ appsDir, libsDir, implicitDependencies, changedFiles }) => {
+const getChanges = async ({ appsDir, libsDir, implicitDependencies, changedFiles }) => {
     const findApp = dirFinder(appsDir);
     const findLib = dirFinder(libsDir);
     const findImplicitDependencies = (file) => implicitDependencies.find(dependency => file === dependency);
-    const ciDependenciesPerApp = getCiDependenciesPerApp(appsDir);
+    const ciDependenciesPerApp = await getCiDependenciesPerApp(appsDir);
     console.log('');
     console.log('-TEST-', ciDependenciesPerApp);
     const changes = changedFiles.reduce((accumulatedChanges, file) => {
@@ -155,7 +155,7 @@ const main = async () => {
         : [];
     const appsDir = ((_a = nxFile.workspaceLayout) === null || _a === void 0 ? void 0 : _a.appsDir) || 'apps';
     const libsDir = ((_b = nxFile.workspaceLayout) === null || _b === void 0 ? void 0 : _b.libsDir) || 'libs';
-    const changes = getChanges({
+    const changes = await getChanges({
         appsDir,
         libsDir,
         implicitDependencies,
@@ -197,7 +197,7 @@ const getAllFiles = (dirPath, arrayOfFiles = []) => {
             arrayOfFiles = exports.getAllFiles(dirPath + '/' + file, arrayOfFiles);
         }
         else {
-            arrayOfFiles.push(path.join(__dirname, dirPath, '/', file));
+            arrayOfFiles.push(path.join(dirPath, '/', file));
         }
     });
     return arrayOfFiles;
