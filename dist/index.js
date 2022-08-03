@@ -95,7 +95,7 @@ const dirFinder = (dir) => {
 };
 const getCiDependenciesPerApp = (appsDir) => {
     const ciDependenciesPerApp = {};
-    const projectFiles = utils_1.getAllFiles(appsDir).filter((fileName) => fileName === 'project.json');
+    const projectFiles = utils_1.getAllFiles(appsDir);
     console.log('');
     console.log(projectFiles);
     if (!projectFiles || projectFiles.length === 0) {
@@ -187,8 +187,8 @@ main().catch(error => core_1.setFailed(error));
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getAllFiles = void 0;
-const path = __webpack_require__(5622);
 const fs_1 = __webpack_require__(5747);
+const path = __webpack_require__(5622);
 const getAllFiles = (dirPath, arrayOfFiles = []) => {
     const files = fs_1.readdirSync(dirPath);
     files.forEach(file => {
