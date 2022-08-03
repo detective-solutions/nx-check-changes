@@ -95,14 +95,15 @@ const dirFinder = (dir) => {
 };
 const getCiDependenciesPerApp = (appsDir) => {
     const ciDependenciesPerApp = {};
-    const projectFiles = utils_1.getAllFiles(appsDir).filter((fileName) => fileName.endsWith('project.json'));
-    console.log('');
-    console.log(projectFiles);
-    if (!projectFiles || projectFiles.length === 0) {
+    const projectFilePaths = utils_1.getAllFiles(appsDir).filter((fileName) => fileName.endsWith('project.json'));
+    if (!projectFilePaths || projectFilePaths.length === 0) {
         return ciDependenciesPerApp;
     }
-    projectFiles.forEach((file) => {
-        const json = JSON.parse(file);
+    console.log('');
+    console.log(projectFilePaths);
+    projectFilePaths.forEach(async (filePath) => {
+        const projectFile = await fs_1.promises.readFile(filePath, { encoding: 'utf-8' });
+        const json = JSON.parse(projectFile);
         const appName = json.root.split('apps/')[1];
         const ciDependencyFolders = json.ciDependencyFolders;
         ciDependenciesPerApp[appName] = ciDependencyFolders;
