@@ -190,7 +190,7 @@ const main = async () => {
   setOutput('changed-apps', JSON.stringify(changes.apps));
   setOutput('changed-libs', JSON.stringify(changes.libs));
   setOutput('changed-dirs', JSON.stringify([...changes.apps, ...changes.libs]));
-  setOutput('not-affected', changes.apps.length === 0 && changes.libs.length === 0);
+  setOutput('has-affected-apps', changes.apps.length !== 0);
 };
 
 main().catch(error => setFailed(error));

@@ -18,7 +18,5 @@ outputs:
     description: Space-delimited string of changed libs
   changed-dirs:
     description: Space-delimited string of changed apps and libs
-  changed-implicit-dependencies:
-    description: Space-delimited string of changed implicit dependencies
-  not-affected:
-    description: Whether or not code changes affect the apps or libs
+  has-affected-apps:
+    description: Whether or not code changes affect any app
