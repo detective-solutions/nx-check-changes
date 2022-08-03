@@ -103,19 +103,16 @@ const getCiDependenciesPerApp = async (appsDir) => {
         const projectFile = JSON.parse(await fs_1.promises.readFile(projectFilePath, { encoding: 'utf-8' }));
         const appName = projectFile.root.split('apps/')[1];
         const ciDependencyFolders = projectFile.ciDependencyFolders;
-        ciDependenciesPerApp[appName] = ciDependencyFolders;
+        if (appName && ciDependencyFolders) {
+            ciDependenciesPerApp[appName] = ciDependencyFolders;
+        }
     }
-    console.log('');
-    console.log(ciDependenciesPerApp);
     return ciDependenciesPerApp;
 };
-const getChanges = async ({ appsDir, libsDir, implicitDependencies, changedFiles }) => {
+const getChanges = async ({ appsDir, libsDir, implicitDependencies, ciDependenciesPerApp, changedFiles }) => {
     const findApp = dirFinder(appsDir);
     const findLib = dirFinder(libsDir);
     const findImplicitDependencies = (file) => implicitDependencies.find(dependency => file === dependency);
-    const ciDependenciesPerApp = await getCiDependenciesPerApp(appsDir);
-    console.log('');
-    console.log('-TEST-', ciDependenciesPerApp);
     const changes = changedFiles.reduce((accumulatedChanges, file) => {
         const app = findApp(file);
         if (app) {
@@ -124,6 +121,11 @@ const getChanges = async ({ appsDir, libsDir, implicitDependencies, changedFiles
         const lib = findLib(file);
         if (lib) {
             accumulatedChanges.libs.add(lib);
+            for (const [key, value] of Object.entries(ciDependenciesPerApp)) {
+                if (value.includes(lib)) {
+                    accumulatedChanges.apps.add(key);
+                }
+            }
         }
         const implicitDependency = findImplicitDependencies(file);
         if (implicitDependency) {
@@ -154,10 +156,13 @@ const main = async () => {
         : [];
     const appsDir = ((_a = nxFile.workspaceLayout) === null || _a === void 0 ? void 0 : _a.appsDir) || 'apps';
     const libsDir = ((_b = nxFile.workspaceLayout) === null || _b === void 0 ? void 0 : _b.libsDir) || 'libs';
+    const ciDependenciesPerApp = await getCiDependenciesPerApp(appsDir);
+    console.log(ciDependenciesPerApp);
     const changes = await getChanges({
         appsDir,
         libsDir,
         implicitDependencies,
+        ciDependenciesPerApp,
         changedFiles
     });
     console.log('');
