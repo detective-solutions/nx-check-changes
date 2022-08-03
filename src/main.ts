@@ -90,7 +90,7 @@ const dirFinder = (dir: string): ((file: string) => string | undefined) => {
   return (file: string) => file.match(pathRegExp)?.[1];
 };
 
-const getCiDependenciesPerApp = (appsDir: string) => {
+const getCiDependenciesPerApp = async (appsDir: string) => {
   const ciDependenciesPerApp: any = {};
   const projectFilePaths = getAllFiles(appsDir).filter((fileName: string) =>
     fileName.endsWith('project.json')
@@ -112,7 +112,7 @@ const getCiDependenciesPerApp = (appsDir: string) => {
   return ciDependenciesPerApp;
 };
 
-const getChanges = ({
+const getChanges = async ({
   appsDir,
   libsDir,
   implicitDependencies,
@@ -122,12 +122,12 @@ const getChanges = ({
   libsDir: string;
   implicitDependencies: string[];
   changedFiles: string[];
-}): Changes => {
+}): Promise<Changes> => {
   const findApp = dirFinder(appsDir);
   const findLib = dirFinder(libsDir);
   const findImplicitDependencies = (file: string) =>
     implicitDependencies.find(dependency => file === dependency);
-  const ciDependenciesPerApp = getCiDependenciesPerApp(appsDir);
+  const ciDependenciesPerApp = await getCiDependenciesPerApp(appsDir);
   console.log('');
   console.log('-TEST-', ciDependenciesPerApp);
 
@@ -180,7 +180,7 @@ const main = async () => {
   const appsDir = nxFile.workspaceLayout?.appsDir || 'apps';
   const libsDir = nxFile.workspaceLayout?.libsDir || 'libs';
 
-  const changes = getChanges({
+  const changes = await getChanges({
     appsDir,
     libsDir,
     implicitDependencies,
