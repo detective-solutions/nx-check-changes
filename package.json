@@ -9,7 +9,7 @@
     "clean": "rimraf dist lib",
     "lint": "eslint",
     "package": "ncc build lib/main.js",
-    "minify": "uglifyjs --compress --mangle --output dist/index.min.js -- dist/index.js",
+    "minify": "uglifyjs --compress --mangle --output dist/index.js -- dist/index.js",
     "release": "npm run build && npm run package && npm run minify",
     "start": "ts-node src/main.ts"
   },
