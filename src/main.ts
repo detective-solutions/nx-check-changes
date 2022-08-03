@@ -92,7 +92,9 @@ const dirFinder = (dir: string): ((file: string) => string | undefined) => {
 
 const getCiDependenciesPerApp = (appsDir: string) => {
   const ciDependenciesPerApp: any = {};
-  const projectFiles = getAllFiles(appsDir);
+  const projectFiles = getAllFiles(appsDir).filter((fileName: string) =>
+    fileName.endsWith('project.json')
+  );
   console.log('');
   console.log(projectFiles);
   if (!projectFiles || projectFiles.length === 0) {
