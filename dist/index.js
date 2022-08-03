@@ -33,11 +33,10 @@ exports.exec = exec;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __webpack_require__(2186);
+const fs_1 = __webpack_require__(5747);
 const core_1 = __webpack_require__(2186);
 const github_1 = __webpack_require__(5438);
 const exec_1 = __webpack_require__(7757);
-const fs_1 = __webpack_require__(5747);
-const fs_2 = __webpack_require__(5747);
 const getBaseAndHeadRefs = ({ base, head }) => {
     var _a, _b, _c, _d;
     if (!base && !head) {
@@ -95,7 +94,7 @@ const dirFinder = (dir) => {
 };
 const getCiDependenciesPerApp = () => {
     const ciDependenciesPerApp = {};
-    const files = fs_2.readdirSync('/').filter((fileName) => fileName === 'project.json');
+    const files = fs_1.readdirSync('apps').filter((fileName) => fileName === 'project.json');
     console.log('');
     console.log(files);
     if (!files || files.length === 0) {
