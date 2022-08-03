@@ -8,7 +8,7 @@ export const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []) => {
     if (statSync(dirPath + '/' + file).isDirectory()) {
       arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles);
     } else {
-      arrayOfFiles.push(path.join(__dirname, dirPath, '/', file));
+      arrayOfFiles.push(path.join(dirPath, '/', file));
     }
   });
   return arrayOfFiles;
