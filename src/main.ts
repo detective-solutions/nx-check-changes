@@ -91,7 +91,7 @@ const dirFinder = (dir: string): ((file: string) => string | undefined) => {
 
 const getCiDependenciesPerApp = () => {
   const ciDependenciesPerApp: any = {};
-  const files = readdirSync('apps').filter((fileName: string) => fileName === 'project.json');
+  const files = readdirSync('./apps');
   console.log('');
   console.log(files);
   if (!files || files.length === 0) {
