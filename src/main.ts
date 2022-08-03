@@ -5,11 +5,11 @@ import { NxJson } from '@nrwl/workspace';
 import { promises as fs } from 'fs';
 
 import { exec } from './exec';
+import { getAllFiles } from './utils';
 
 interface Changes {
   apps: string[];
   libs: string[];
-  implicitDependencies: string[];
 }
 
 interface Refs {
@@ -89,26 +89,43 @@ const dirFinder = (dir: string): ((file: string) => string | undefined) => {
   return (file: string) => file.match(pathRegExp)?.[1];
 };
 
-const getChanges = ({
+const getLibDependenciesPerApp = async (appsDir: string) => {
+  const libDependenciesPerApp: { [key: string]: string[] } = {};
+  const projectFilePaths = getAllFiles(appsDir).filter((fileName: string) =>
+    fileName.endsWith('project.json')
+  );
+  if (!projectFilePaths || projectFilePaths.length === 0) {
+    return libDependenciesPerApp;
+  }
+
+  for (const projectFilePath of projectFilePaths) {
+    const projectFile = JSON.parse(await fs.readFile(projectFilePath, { encoding: 'utf-8' }));
+    const appName = projectFile.root.split('apps/')[1];
+    const ciDependencyFolders = projectFile.ciDependencyFolders;
+    if (appName && ciDependencyFolders) {
+      libDependenciesPerApp[appName] = ciDependencyFolders;
+    }
+  }
+  return libDependenciesPerApp;
+};
+
+const getChanges = async ({
   appsDir,
   libsDir,
-  implicitDependencies,
+  libDependenciesPerApp,
   changedFiles
 }: {
   appsDir: string;
   libsDir: string;
-  implicitDependencies: string[];
+  libDependenciesPerApp: { [key: string]: string[] };
   changedFiles: string[];
-}): Changes => {
+}): Promise<Changes> => {
   const findApp = dirFinder(appsDir);
   const findLib = dirFinder(libsDir);
-  const findImplicitDependencies = (file: string) =>
-    implicitDependencies.find(dependency => file === dependency);
 
   const changes = changedFiles.reduce<{
     apps: Set<string>;
     libs: Set<string>;
-    implicitDependencies: string[];
   }>(
     (accumulatedChanges, file) => {
       const app = findApp(file);
@@ -118,24 +135,25 @@ const getChanges = ({
       const lib = findLib(file);
       if (lib) {
         accumulatedChanges.libs.add(lib);
-      }
-      const implicitDependency = findImplicitDependencies(file);
-      if (implicitDependency) {
-        accumulatedChanges.implicitDependencies.push(implicitDependency);
+
+        // Check if an app depends on a changed lib and add the app to the accumulatedChanges
+        for (const [affectedApp, libDependencies] of Object.entries(libDependenciesPerApp)) {
+          if (libDependencies.includes(lib)) {
+            accumulatedChanges.apps.add(affectedApp);
+          }
+        }
       }
       return accumulatedChanges;
     },
     {
       apps: new Set<string>(),
-      libs: new Set<string>(),
-      implicitDependencies: []
+      libs: new Set<string>()
     }
   );
 
   return {
     apps: [...changes.apps.values()],
-    libs: [...changes.libs.values()],
-    implicitDependencies: changes.implicitDependencies
+    libs: [...changes.libs.values()]
   };
 };
 
@@ -148,16 +166,15 @@ const main = async () => {
   const changedFiles = await getChangedFiles(base, head);
 
   const nxFile = await readNxFile();
-  const implicitDependencies = nxFile.implicitDependencies
-    ? Object.keys(nxFile.implicitDependencies)
-    : [];
   const appsDir = nxFile.workspaceLayout?.appsDir || 'apps';
   const libsDir = nxFile.workspaceLayout?.libsDir || 'libs';
 
-  const changes = getChanges({
+  const libDependenciesPerApp = await getLibDependenciesPerApp(appsDir);
+
+  const changes = await getChanges({
     appsDir,
     libsDir,
-    implicitDependencies,
+    libDependenciesPerApp,
     changedFiles
   });
 
@@ -169,20 +186,11 @@ const main = async () => {
   console.log('Changed libs:');
   console.log(changes.libs);
 
-  console.log('Changed implicit dependencies:');
-  console.log(changes.implicitDependencies);
-
   // Output stringified lists in order to be reused as dynamic matrix inputs for follow-up actions
   setOutput('changed-apps', JSON.stringify(changes.apps));
   setOutput('changed-libs', JSON.stringify(changes.libs));
   setOutput('changed-dirs', JSON.stringify([...changes.apps, ...changes.libs]));
-  setOutput('changed-implicit-dependencies', JSON.stringify(changes.implicitDependencies));
-  setOutput(
-    'not-affected',
-    changes.apps.length === 0 &&
-      changes.libs.length === 0 &&
-      changes.implicitDependencies.length === 0
-  );
+  setOutput('not-affected', changes.apps.length === 0 && changes.libs.length === 0);
 };
 
 main().catch(error => setFailed(error));
