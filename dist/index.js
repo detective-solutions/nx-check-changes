@@ -33,10 +33,11 @@ exports.exec = exec;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __webpack_require__(2186);
-const fs_1 = __webpack_require__(5747);
 const core_1 = __webpack_require__(2186);
 const github_1 = __webpack_require__(5438);
 const exec_1 = __webpack_require__(7757);
+const fs_1 = __webpack_require__(5747);
+const utils_1 = __webpack_require__(918);
 const getBaseAndHeadRefs = ({ base, head }) => {
     var _a, _b, _c, _d;
     if (!base && !head) {
@@ -92,15 +93,15 @@ const dirFinder = (dir) => {
     const pathRegExp = new RegExp(`^${dir}/([^/]+)`);
     return (file) => { var _a; return (_a = file.match(pathRegExp)) === null || _a === void 0 ? void 0 : _a[1]; };
 };
-const getCiDependenciesPerApp = () => {
+const getCiDependenciesPerApp = (appsDir) => {
     const ciDependenciesPerApp = {};
-    const files = fs_1.readdirSync('./apps');
+    const projectFiles = utils_1.getAllFiles(appsDir).filter((fileName) => fileName === 'project.json');
     console.log('');
-    console.log(files);
-    if (!files || files.length === 0) {
+    console.log(projectFiles);
+    if (!projectFiles || projectFiles.length === 0) {
         return ciDependenciesPerApp;
     }
-    files.forEach((file) => {
+    projectFiles.forEach((file) => {
         const json = JSON.parse(file);
         const appName = json.root.split('apps/')[1];
         const ciDependencyFolders = json.ciDependencyFolders;
@@ -112,7 +113,7 @@ const getChanges = ({ appsDir, libsDir, implicitDependencies, changedFiles }) =>
     const findApp = dirFinder(appsDir);
     const findLib = dirFinder(libsDir);
     const findImplicitDependencies = (file) => implicitDependencies.find(dependency => file === dependency);
-    const ciDependenciesPerApp = getCiDependenciesPerApp();
+    const ciDependenciesPerApp = getCiDependenciesPerApp(appsDir);
     console.log('');
     console.log('-TEST-', ciDependenciesPerApp);
     const changes = changedFiles.reduce((accumulatedChanges, file) => {
@@ -176,6 +177,32 @@ const main = async () => {
 };
 main().catch(error => core_1.setFailed(error));
 //# sourceMappingURL=main.js.map
+
+/***/ }),
+
+/***/ 918:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getAllFiles = void 0;
+const path = __webpack_require__(5622);
+const fs_1 = __webpack_require__(5747);
+const getAllFiles = (dirPath, arrayOfFiles = []) => {
+    const files = fs_1.readdirSync(dirPath);
+    files.forEach(file => {
+        if (fs_1.statSync(dirPath + '/' + file).isDirectory()) {
+            arrayOfFiles = exports.getAllFiles(dirPath + '/' + file, arrayOfFiles);
+        }
+        else {
+            arrayOfFiles.push(path.join(__dirname, dirPath, '/', file));
+        }
+    });
+    return arrayOfFiles;
+};
+exports.getAllFiles = getAllFiles;
+//# sourceMappingURL=utils.js.map
 
 /***/ }),
 
