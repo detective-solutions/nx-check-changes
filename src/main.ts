@@ -10,7 +10,6 @@ import { getAllFiles } from './utils';
 interface Changes {
   apps: string[];
   libs: string[];
-  implicitDependencies: string[];
 }
 
 interface Refs {
@@ -113,25 +112,20 @@ const getLibDependenciesPerApp = async (appsDir: string) => {
 const getChanges = async ({
   appsDir,
   libsDir,
-  implicitDependencies,
   libDependenciesPerApp,
   changedFiles
 }: {
   appsDir: string;
   libsDir: string;
-  implicitDependencies: string[];
   libDependenciesPerApp: { [key: string]: string[] };
   changedFiles: string[];
 }): Promise<Changes> => {
   const findApp = dirFinder(appsDir);
   const findLib = dirFinder(libsDir);
-  const findImplicitDependencies = (file: string) =>
-    implicitDependencies.find(dependency => file === dependency);
 
   const changes = changedFiles.reduce<{
     apps: Set<string>;
     libs: Set<string>;
-    implicitDependencies: string[];
   }>(
     (accumulatedChanges, file) => {
       const app = findApp(file);
@@ -149,24 +143,17 @@ const getChanges = async ({
           }
         }
       }
-
-      const implicitDependency = findImplicitDependencies(file);
-      if (implicitDependency) {
-        accumulatedChanges.implicitDependencies.push(implicitDependency);
-      }
       return accumulatedChanges;
     },
     {
       apps: new Set<string>(),
-      libs: new Set<string>(),
-      implicitDependencies: []
+      libs: new Set<string>()
     }
   );
 
   return {
     apps: [...changes.apps.values()],
-    libs: [...changes.libs.values()],
-    implicitDependencies: changes.implicitDependencies
+    libs: [...changes.libs.values()]
   };
 };
 
@@ -179,9 +166,6 @@ const main = async () => {
   const changedFiles = await getChangedFiles(base, head);
 
   const nxFile = await readNxFile();
-  const implicitDependencies = nxFile.implicitDependencies
-    ? Object.keys(nxFile.implicitDependencies)
-    : [];
   const appsDir = nxFile.workspaceLayout?.appsDir || 'apps';
   const libsDir = nxFile.workspaceLayout?.libsDir || 'libs';
 
@@ -190,7 +174,6 @@ const main = async () => {
   const changes = await getChanges({
     appsDir,
     libsDir,
-    implicitDependencies,
     libDependenciesPerApp,
     changedFiles
   });
@@ -203,20 +186,11 @@ const main = async () => {
   console.log('Changed libs:');
   console.log(changes.libs);
 
-  console.log('Changed implicit dependencies:');
-  console.log(changes.implicitDependencies);
-
   // Output stringified lists in order to be reused as dynamic matrix inputs for follow-up actions
   setOutput('changed-apps', JSON.stringify(changes.apps));
   setOutput('changed-libs', JSON.stringify(changes.libs));
   setOutput('changed-dirs', JSON.stringify([...changes.apps, ...changes.libs]));
-  setOutput('changed-implicit-dependencies', JSON.stringify(changes.implicitDependencies));
-  setOutput(
-    'not-affected',
-    changes.apps.length === 0 &&
-      changes.libs.length === 0 &&
-      changes.implicitDependencies.length === 0
-  );
+  setOutput('not-affected', changes.apps.length === 0 && changes.libs.length === 0);
 };
 
 main().catch(error => setFailed(error));
