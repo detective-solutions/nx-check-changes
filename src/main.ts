@@ -100,8 +100,8 @@ const getLibDependenciesPerApp = async (appsDir: string) => {
 
   for (const projectFilePath of projectFilePaths) {
     const projectFile = JSON.parse(await fs.readFile(projectFilePath, { encoding: 'utf-8' }));
-    const appName = projectFile.root.split('apps/')[1];
-    const libFolderDependencies = projectFile.libFolderDependencies;
+    const appName = projectFile?.name;
+    const libFolderDependencies = projectFile?.libFolderDependencies;
     if (appName && libFolderDependencies) {
       libDependenciesPerApp[appName] = libFolderDependencies;
     }
