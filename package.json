@@ -1,7 +1,7 @@
 {
   "name": "nx-check-changes",
   "description": "GitHub Action that checks path changes in a Nx workspace",
-  "version": "1.1.0",
+  "version": "3.0.0",
   "private": true,
   "main": "dist/index.js",
   "scripts": {
@@ -14,9 +14,9 @@
     "start": "ts-node src/main.ts"
   },
   "dependencies": {
-    "@actions/core": "1.2.6",
-    "@actions/exec": "1.0.4",
-    "@actions/github": "4.0.0"
+    "@actions/core": "1.10.0",
+    "@actions/exec": "1.1.1",
+    "@actions/github": "5.1.1"
   },
   "devDependencies": {
     "@nrwl/workspace": "11.0.2",
@@ -36,11 +36,11 @@
     "eslint-plugin-unused-imports": "1.0.1",
     "husky": "4.3.5",
     "lint-staged": "10.5.3",
-    "prettier": "2.2.1",
-    "prettier-eslint": "12.0.0",
+    "prettier": "2.8.0",
+    "prettier-eslint": "15.0.1",
     "rimraf": "3.0.2",
     "ts-node": "9.1.1",
     "typescript": "4.1.3",
-    "uglify-js": "3.16.3"
+    "uglify-js": "3.17.4"
   }
 }
